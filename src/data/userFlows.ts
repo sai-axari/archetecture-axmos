@@ -54,7 +54,7 @@ export const userFlows: UserFlow[] = [
         id: 'signup-1',
         label: 'User visits the app',
         detail:
-          'Browser navigates to the Company of Agents URL. Next.js serves the landing page with ClerkProvider wrapping the component tree.',
+          'Browser navigates to the Axari URL. Next.js serves the landing page with ClerkProvider wrapping the component tree.',
         system: 'UI',
         technical: ['ClerkProvider initializes', 'Redirect to /sign-in if unauthenticated'],
       },
