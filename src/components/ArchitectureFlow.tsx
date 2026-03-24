@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
   useReactFlow,
-  applyNodeChanges,
+  useNodesState,
   type Node,
   type Edge,
   type NodeTypes,
@@ -114,61 +114,51 @@ function FlowCanvas() {
   const detailNodeId =
     state.view.mode === 'detail' ? state.view.nodeId : null;
 
-  const [overviewPositions, setOverviewPositions] = useState<
-    Record<string, { x: number; y: number }>
-  >({});
-  const [detailPositions, setDetailPositions] = useState<
-    Record<string, { x: number; y: number }>
-  >({});
-
-  const nodes: Node[] = useMemo(() => {
-    if (isOverview) {
-      return overviewNodes.map((n) => ({
+  const initialOverviewNodes: Node[] = useMemo(
+    () =>
+      overviewNodes.map((n) => ({
         ...n,
-        position: overviewPositions[n.id] ?? n.position,
         draggable: true,
-        data: {
-          ...n.data,
-          isHighlighted:
-            state.hoveredNodeId === n.id || state.selectedNodeId === n.id,
-        },
-      }));
-    }
-    const detail = detailNodeId ? componentDetails[detailNodeId] : null;
-    return (detail?.nodes ?? []).map((n) => ({
-      ...n,
-      position: detailPositions[n.id] ?? n.position,
-      draggable: true,
-    }));
-  }, [
-    isOverview,
-    detailNodeId,
-    state.hoveredNodeId,
-    state.selectedNodeId,
-    overviewPositions,
-    detailPositions,
-  ]);
-
-  const onNodesChange: OnNodesChange = useCallback(
-    (changes) => {
-      const positionChanges = changes.filter(
-        (c) => c.type === 'position' && c.position
-      );
-      if (positionChanges.length === 0) return;
-
-      const setter = isOverview ? setOverviewPositions : setDetailPositions;
-      setter((prev) => {
-        const next = { ...prev };
-        for (const change of positionChanges) {
-          if (change.type === 'position' && change.position) {
-            next[change.id] = change.position;
-          }
-        }
-        return next;
-      });
-    },
-    [isOverview]
+        data: { ...n.data, isHighlighted: false },
+      })),
+    []
   );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialOverviewNodes);
+  const prevViewRef = useRef<string>('overview');
+
+  useEffect(() => {
+    const viewKey = isOverview ? 'overview' : `detail-${detailNodeId}`;
+    if (viewKey !== prevViewRef.current) {
+      prevViewRef.current = viewKey;
+      if (isOverview) {
+        setNodes(
+          overviewNodes.map((n) => ({
+            ...n,
+            draggable: true,
+            data: { ...n.data, isHighlighted: false },
+          }))
+        );
+      } else {
+        const detail = detailNodeId ? componentDetails[detailNodeId] : null;
+        setNodes(
+          (detail?.nodes ?? []).map((n) => ({ ...n, draggable: true }))
+        );
+      }
+    }
+  }, [isOverview, detailNodeId, setNodes]);
+
+  useEffect(() => {
+    if (!isOverview) return;
+    setNodes((nds) =>
+      nds.map((n) => {
+        const highlighted =
+          state.hoveredNodeId === n.id || state.selectedNodeId === n.id;
+        if ((n.data as any).isHighlighted === highlighted) return n;
+        return { ...n, data: { ...n.data, isHighlighted: highlighted } };
+      })
+    );
+  }, [isOverview, state.hoveredNodeId, state.selectedNodeId, setNodes]);
 
   // Compute edges with active flow info
   const edges: Edge[] = useMemo(() => {
@@ -198,7 +188,6 @@ function FlowCanvas() {
   const onNodeClick: NodeMouseHandler = useCallback(
     (_event, node) => {
       if (isOverview && componentDetails[node.id]) {
-        setDetailPositions({});
         dispatch({ type: 'CLICK_NODE', nodeId: node.id });
         setTimeout(() => fitView({ duration: 800, padding: 0.15 }), 50);
       } else {
