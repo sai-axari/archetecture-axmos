@@ -1,15 +1,17 @@
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useMemo, useReducer, useState } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
   useReactFlow,
+  applyNodeChanges,
   type Node,
   type Edge,
   type NodeTypes,
   type EdgeTypes,
   type NodeMouseHandler,
+  type OnNodesChange,
 } from '@xyflow/react';
 
 import { SystemNode } from './nodes/SystemNode';
@@ -112,11 +114,19 @@ function FlowCanvas() {
   const detailNodeId =
     state.view.mode === 'detail' ? state.view.nodeId : null;
 
-  // Compute nodes
+  const [overviewPositions, setOverviewPositions] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
+  const [detailPositions, setDetailPositions] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
+
   const nodes: Node[] = useMemo(() => {
     if (isOverview) {
       return overviewNodes.map((n) => ({
         ...n,
+        position: overviewPositions[n.id] ?? n.position,
+        draggable: true,
         data: {
           ...n.data,
           isHighlighted:
@@ -125,8 +135,40 @@ function FlowCanvas() {
       }));
     }
     const detail = detailNodeId ? componentDetails[detailNodeId] : null;
-    return detail?.nodes ?? [];
-  }, [isOverview, detailNodeId, state.hoveredNodeId, state.selectedNodeId]);
+    return (detail?.nodes ?? []).map((n) => ({
+      ...n,
+      position: detailPositions[n.id] ?? n.position,
+      draggable: true,
+    }));
+  }, [
+    isOverview,
+    detailNodeId,
+    state.hoveredNodeId,
+    state.selectedNodeId,
+    overviewPositions,
+    detailPositions,
+  ]);
+
+  const onNodesChange: OnNodesChange = useCallback(
+    (changes) => {
+      const positionChanges = changes.filter(
+        (c) => c.type === 'position' && c.position
+      );
+      if (positionChanges.length === 0) return;
+
+      const setter = isOverview ? setOverviewPositions : setDetailPositions;
+      setter((prev) => {
+        const next = { ...prev };
+        for (const change of positionChanges) {
+          if (change.type === 'position' && change.position) {
+            next[change.id] = change.position;
+          }
+        }
+        return next;
+      });
+    },
+    [isOverview]
+  );
 
   // Compute edges with active flow info
   const edges: Edge[] = useMemo(() => {
@@ -156,6 +198,7 @@ function FlowCanvas() {
   const onNodeClick: NodeMouseHandler = useCallback(
     (_event, node) => {
       if (isOverview && componentDetails[node.id]) {
+        setDetailPositions({});
         dispatch({ type: 'CLICK_NODE', nodeId: node.id });
         setTimeout(() => fitView({ duration: 800, padding: 0.15 }), 50);
       } else {
@@ -195,10 +238,12 @@ function FlowCanvas() {
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
         onNodeClick={onNodeClick}
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
         onPaneClick={() => dispatch({ type: 'SELECT_NODE', nodeId: null })}
+        nodesDraggable
         fitView
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.1}
