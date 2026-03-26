@@ -1,17 +1,15 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useMemo, useReducer } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
   useReactFlow,
-  useNodesState,
   type Node,
   type Edge,
   type NodeTypes,
   type EdgeTypes,
   type NodeMouseHandler,
-  type OnNodesChange,
 } from '@xyflow/react';
 
 import { SystemNode } from './nodes/SystemNode';
@@ -114,51 +112,21 @@ function FlowCanvas() {
   const detailNodeId =
     state.view.mode === 'detail' ? state.view.nodeId : null;
 
-  const initialOverviewNodes: Node[] = useMemo(
-    () =>
-      overviewNodes.map((n) => ({
+  // Compute nodes
+  const nodes: Node[] = useMemo(() => {
+    if (isOverview) {
+      return overviewNodes.map((n) => ({
         ...n,
-        draggable: true,
-        data: { ...n.data, isHighlighted: false },
-      })),
-    []
-  );
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialOverviewNodes);
-  const prevViewRef = useRef<string>('overview');
-
-  useEffect(() => {
-    const viewKey = isOverview ? 'overview' : `detail-${detailNodeId}`;
-    if (viewKey !== prevViewRef.current) {
-      prevViewRef.current = viewKey;
-      if (isOverview) {
-        setNodes(
-          overviewNodes.map((n) => ({
-            ...n,
-            draggable: true,
-            data: { ...n.data, isHighlighted: false },
-          }))
-        );
-      } else {
-        const detail = detailNodeId ? componentDetails[detailNodeId] : null;
-        setNodes(
-          (detail?.nodes ?? []).map((n) => ({ ...n, draggable: true }))
-        );
-      }
+        data: {
+          ...n.data,
+          isHighlighted:
+            state.hoveredNodeId === n.id || state.selectedNodeId === n.id,
+        },
+      }));
     }
-  }, [isOverview, detailNodeId, setNodes]);
-
-  useEffect(() => {
-    if (!isOverview) return;
-    setNodes((nds) =>
-      nds.map((n) => {
-        const highlighted =
-          state.hoveredNodeId === n.id || state.selectedNodeId === n.id;
-        if ((n.data as any).isHighlighted === highlighted) return n;
-        return { ...n, data: { ...n.data, isHighlighted: highlighted } };
-      })
-    );
-  }, [isOverview, state.hoveredNodeId, state.selectedNodeId, setNodes]);
+    const detail = detailNodeId ? componentDetails[detailNodeId] : null;
+    return detail?.nodes ?? [];
+  }, [isOverview, detailNodeId, state.hoveredNodeId, state.selectedNodeId]);
 
   // Compute edges with active flow info
   const edges: Edge[] = useMemo(() => {
@@ -227,12 +195,10 @@ function FlowCanvas() {
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        onNodesChange={onNodesChange}
         onNodeClick={onNodeClick}
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
         onPaneClick={() => dispatch({ type: 'SELECT_NODE', nodeId: null })}
-        nodesDraggable
         fitView
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.1}
@@ -278,7 +244,7 @@ function FlowCanvas() {
             textShadow: '0 0 20px rgba(99,102,241,0.3)',
           }}
         >
-          Axari
+          Company of Agents
         </div>
         <div
           style={{
