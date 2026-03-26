@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ArchitectureFlow } from './components/ArchitectureFlow';
 import { UserFlowView } from './components/UserFlowView';
+import { AgentTeamsViz } from './components/AgentTeamsViz';
 import { ParticleBackground } from './components/effects/ParticleBackground';
 import { Scanline } from './components/effects/Scanline';
 import './index.css';
 
-type Tab = 'architecture' | 'user-flows';
+type Tab = 'architecture' | 'user-flows' | 'agent-teams';
 
 function TabBar({
   active,
@@ -18,6 +19,7 @@ function TabBar({
   const tabs: { id: Tab; label: string }[] = [
     { id: 'architecture', label: 'Architecture' },
     { id: 'user-flows', label: 'User Flows' },
+    { id: 'agent-teams', label: 'Agent Teams' },
   ];
 
   return (
@@ -117,6 +119,20 @@ export default function App() {
         }}
       >
         <UserFlowView />
+      </div>
+
+      {/* Agent Teams view */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: activeTab === 'agent-teams' ? 1 : -1,
+          opacity: activeTab === 'agent-teams' ? 1 : 0,
+          transition: 'opacity 0.3s',
+          pointerEvents: activeTab === 'agent-teams' ? 'auto' : 'none',
+        }}
+      >
+        <AgentTeamsViz />
       </div>
     </div>
   );
