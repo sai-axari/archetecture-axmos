@@ -1,113 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import '@xyflow/react/dist/style.css';
 
-:root {
-  /* Background */
-  --bg-primary: #030810;
-  --bg-secondary: #0a0f1a;
-
-  /* Accent */
-  --accent-primary: #6366f1;
-  --accent-secondary: #818cf8;
-
-  /* Border */
-  --border: #262626;
-
-  /* Text */
-  --text-primary: #e5e5e5;
-  --text-secondary: #a3a3a3;
-  --text-heading: #ffffff;
-
-  /* Flow colors */
-  --flow-dm: #6366f1;
-  --flow-channel: #10b981;
-  --flow-mention: #f59e0b;
-  --flow-outcome: #f43f5e;
-  --flow-oauth: #06b6d4;
-}
-
-/* Global reset */
 * {
   margin: 0;
   padding: 0;
-  border-radius: 0 !important;
   box-sizing: border-box;
 }
 
 body {
-  background: #030810;
+  background: #0a0a0a;
   color: #e5e5e5;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-.mono {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
-}
-
-.glow-indigo {
-  box-shadow:
-    0 0 8px rgba(99, 102, 241, 0.3),
-    0 0 20px rgba(99, 102, 241, 0.15),
-    0 0 40px rgba(99, 102, 241, 0.05);
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #0a0f1a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #262626;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #404040;
-}
-
-/* React Flow overrides */
+/* ── React Flow overrides ── */
 .react-flow {
-  background: #030810 !important;
-}
-
-.react-flow__background {
-  background: #030810 !important;
+  background: #0a0a0a !important;
 }
 
 .react-flow__minimap {
-  background: #0a0f1a !important;
+  background: #141414 !important;
   border: 1px solid #262626 !important;
+  border-radius: 8px !important;
 }
 
 .react-flow__minimap-mask {
-  fill: rgba(99, 102, 241, 0.1) !important;
-}
-
-.react-flow__minimap-node {
-  fill: #262626 !important;
-  stroke: #404040 !important;
+  fill: rgba(99, 102, 241, 0.08) !important;
 }
 
 .react-flow__controls {
-  background: #0a0f1a !important;
+  background: #141414 !important;
   border: 1px solid #262626 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
 }
 
 .react-flow__controls-button {
-  background: #0a0f1a !important;
-  border-bottom: 1px solid #262626 !important;
-  fill: #a3a3a3 !important;
+  background: #141414 !important;
+  border-bottom: 1px solid #1a1a1a !important;
+  fill: #737373 !important;
+  border-radius: 0 !important;
 }
 
 .react-flow__controls-button:hover {
-  background: #1a1a2e !important;
+  background: #1f1f1f !important;
   fill: #e5e5e5 !important;
 }
 
@@ -115,12 +53,13 @@ body {
   display: none !important;
 }
 
-/* Scanline animation */
-@keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100%);
-  }
+.react-flow__edge-text {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
 }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
