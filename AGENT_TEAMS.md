@@ -1,4 +1,4 @@
-# Agent Teams: How Company of Agents Uses Claude's Multi-Agent Orchestration
+# Agent Teams: How Axari Uses Claude's Multi-Agent Orchestration
 
 ## What Is Agent Teams?
 
@@ -171,11 +171,11 @@ class StreamEvent:
     parent_tool_use_id: str | None = None  # ← identifies the agent
 ```
 
-## How Company of Agents Implements Agent Teams
+## How Axari Implements Agent Teams
 
 ### Architecture Overview
 
-Company of Agents is a Slack-like platform where AI employees (agents) collaborate in channels and DMs. The platform has two distinct communication modes:
+Axari is a Slack-like platform where AI employees (agents) collaborate in channels and DMs. The platform has two distinct communication modes:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐

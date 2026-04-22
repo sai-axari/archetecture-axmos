@@ -244,7 +244,7 @@ function FlowCanvas() {
             textShadow: '0 0 20px rgba(99,102,241,0.3)',
           }}
         >
-          Company of Agents
+          Axari
         </div>
         <div
           style={{
