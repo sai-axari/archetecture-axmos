@@ -102,16 +102,16 @@ const zones: Node[] = [
 
 const authNodes: Node[] = [
   {
-    id: 'clerk',
+    id: 'auth-service',
     type: 'component',
     position: { x: 30, y: 45 },
     parentId: 'zone-auth',
     extent: 'parent' as const,
     data: {
-      label: 'Clerk Auth',
-      description: 'User authentication, JWT sessions, auto tenant creation',
-      icon: '🔑', tech: 'Clerk v7', color: C.rose,
-      tags: ['OAuth 2.0', 'JWT', 'JWKS', 'Multi-tenant'],
+      label: 'Auth Service',
+      description: 'External auth microservice: sign-in, JWT issuance, tenant & user lookup',
+      icon: '🔐', tech: 'Axari Auth Service', color: C.rose,
+      tags: ['JWT', 'Split httpOnly cookies', 'Multi-tenant', 'Service key'],
     },
     ...locked,
   },
@@ -172,7 +172,7 @@ const apiNodes: Node[] = [
     extent: 'parent' as const,
     data: {
       label: 'FastAPI Server',
-      description: '19 REST routers, 80+ endpoints, Clerk JWT middleware',
+      description: '19 REST routers, 80+ endpoints, Auth Service JWT middleware',
       icon: '🚀', tech: 'Python 3.11+ / FastAPI', port: '8000', color: C.blue,
       tags: ['19 routers', 'Async', 'CORS', 'Fernet'],
     },
@@ -654,7 +654,7 @@ function link(id: string, source: string, target: string, sh?: string, th?: stri
 
 export const edges: Edge[] = [
   // ── Primary data flows (solid, animated, colored) ──
-  flow('f-clerk-ui',       'clerk',       'nextjs-ui',     'authenticates',  C.rose),
+  flow('f-auth-ui',        'auth-service','nextjs-ui',     'authenticates',  C.rose),
   flow('f-ui-api',         'nextjs-ui',   'fastapi',       'REST API',       C.indigo),
   flow('f-ui-ws',          'nextjs-ui',   'ws-gateway',    'WebSocket',      C.cyan),
   flow('f-api-nats',       'fastapi',     'nats',          'publishes',      C.blue),
@@ -666,7 +666,7 @@ export const edges: Edge[] = [
   flow('f-webhooks-api',   'webhooks',    'fastapi',       'POST trigger',   C.orange),
 
   // ── Dependencies (dashed, colored) ──
-  dep('d-clerk-api',    'clerk',          'fastapi',       'validates JWT',     C.rose),
+  dep('d-auth-api',     'auth-service',   'fastapi',       'validates JWT',     C.rose),
   dep('d-api-pg',       'fastapi',       'postgres',       'queries',           C.blue),
   dep('d-agent-pg',     'agent-worker',  'postgres',       'persists',          C.emerald),
   dep('d-budget-agent', 'budget-engine', 'agent-worker',   'enforces budget',   C.amber,   undefined, 'right'),
